@@ -222,15 +222,8 @@ public class Matrix {
                 if (this.data == null) return null;
                 if (!this.isSquare()) return null;
             
-                var copy : Matrix;
-                copy = new Matrix(this.cols, this.rows);
-                for (var i = 0; i < copy.cols; i++) {
-                    for (var j = 0; j < copy.rows; j++) {
-                        copy.setAt(i, j, this.getAt(i,j));
-                    }
-                }
-                var identity : Matrix;
-                identity = I(this.cols);
+                var copy: Matrix = this.copy();
+                var identity : Matrix = I(this.cols);
             
 	            var numerator : float; 
 	            var denominator : float; 
@@ -242,7 +235,7 @@ public class Matrix {
 	            var lower_i = new Array(copy.cols);
            
                 // Reduce to the diagonal only. 
-                for(i = 0; i < copy.rows; i++) {
+                for(var i = 0; i < copy.rows; i++) {
 	                upper = copy.getRow(i);
                     var counter = i;
                     while (upper[i] == 0) {
@@ -259,7 +252,7 @@ public class Matrix {
                     
 	                denominator = upper[i];
 	                
-                	for(j = 0; j < copy.cols; j++) {
+                	for(var j = 0; j < copy.cols; j++) {
                         if(j != i) {
                             lower = copy.getRow(j);
                             lower_i = identity.getRow(j);                   
@@ -298,10 +291,25 @@ public class Matrix {
 
 
         public function transpose() {
-                return this;
+                var copy : Matrix;
+                copy = new Matrix(this.cols, this.rows);
+                for (var i = 0; i < copy.cols; i++) {
+                    for (var j = 0; j < copy.rows; j++) {
+                        copy.setAt(j, i, this.getAt(i,j));
+                    }
+                }
+                return copy;
         }
 
         public function equals(matrix : Matrix) {
+                for (var i = 0; i < this.cols; i++) {
+                    for (var j = 0; j < this.rows; j++) {
+                        if (this.getAt(i,j) != matrix.getAt(i,j)) {
+                            return false;
+                        }
+                    }
+                }
+            
                 return true;
         }
 }

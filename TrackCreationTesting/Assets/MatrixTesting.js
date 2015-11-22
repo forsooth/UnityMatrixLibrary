@@ -47,8 +47,8 @@ function Start () {
         Debug.Log("");
 		
         m.multiply(q).print();
+        m.transpose().print();
 }
 
 function Update () {
-
 }
