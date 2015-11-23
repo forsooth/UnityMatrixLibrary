@@ -1,9 +1,9 @@
 #pragma strict
 
 // TODO
-// Make inverse, determinant, equals, and transpose work
+// Make determinant
 // Change from using javascript arrays to using Unity native double[][] arrays
-// change all data values from int to double, or even better to a void* ambiguous type equivalent
+// change all data values to even better to a void* ambiguous type equivalent
 // debug extensively
 // comment code
 // optimize
@@ -209,11 +209,84 @@ public class Matrix {
           
         }
 
+        public function multiply(value: double) {
+                if (this.data == null) return null;
+
+                var result : Matrix;
+                result = new Matrix(this.rows, this.numCols());
+
+                for (var i = 0; i < this.rows; i++) {
+                        for (var j = 0; j < this.numCols(); j++) {
+                                result.setAt(i, j, this.getAt(i,j) * value);                                
+                        }
+                }
+
+                return result;
+          
+        }
+
 
         public function determinant() {
+                if (this.data == null) return null;
                 if (!this.isSquare()) return null;
 
-                return 0;
+                var copy: Matrix = this.copy();
+                var identity : Matrix = I(this.cols);
+            
+	            var numerator : float; 
+	            var denominator : float; 
+	            var element : float;
+	            var element2 : float;                
+	            var upper = new Array(copy.cols);
+	            var upper_i = new Array(copy.cols);
+ 	            var lower = new Array(copy.cols);
+	            var lower_i = new Array(copy.cols);
+           
+                // Reduce to upper row echelon form
+                for(var i = 0; i < copy.rows - 1; i++) {
+	                upper = copy.getRow(i);
+                    var counter = i;
+                    while (upper[i] == 0) {
+                        upper = copy.getRow(++counter);
+                        if (counter >= copy.rows)
+                            return null;
+                    }
+	                upper_i = identity.getRow(counter);
+                    
+                    copy.setRow(counter, copy.getRow(i));
+                    copy.setRow(i, upper);
+                    identity.setRow(counter, identity.getRow(i));
+                    identity.setRow(i, upper_i);
+                    
+	                denominator = upper[i];
+	                
+                	for(var j = i + 1; j < copy.cols; j++) {
+                        lower = copy.getRow(j);
+                        lower_i = identity.getRow(j);                   
+                        numerator = lower[i];
+
+                        for(var k = 0; k < copy.cols; k++) {
+                            element = upper[k];
+                            element2 = lower[k];
+                            lower[k] = element2 - numerator/denominator*element;
+                            element = upper_i[k];
+                            element2 = lower_i[k];
+                            lower_i[k] = element2 - numerator/denominator*element;
+                        }
+                        
+                        copy.setRow(j, lower);
+                        identity.setRow(j, lower_i);                    
+                        
+                    }
+                }
+                
+                var determinant : double = 1;
+                for(i = 0; i < copy.cols; i++) {
+                    determinant *= copy.getAt(i,i) * identity.getAt(i,i);
+                }
+                copy.print();
+                identity.print();
+                return determinant;
                 
         }
         
@@ -309,7 +382,6 @@ public class Matrix {
                         }
                     }
                 }
-            
                 return true;
         }
 }
