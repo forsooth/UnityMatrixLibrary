@@ -284,8 +284,7 @@ public class Matrix {
                 for(i = 0; i < copy.cols; i++) {
                     determinant *= copy.getAt(i,i) * identity.getAt(i,i);
                 }
-                copy.print();
-                identity.print();
+                
                 return determinant;
                 
         }
