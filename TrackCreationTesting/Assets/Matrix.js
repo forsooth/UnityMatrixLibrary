@@ -284,7 +284,7 @@ public class Matrix {
 		                j++;
 		            }
 		        } // now we have a valid pivot
-		        for (j = i+1; j < (this.cols-1); j++) {
+		        for (j = i+1; j < this.cols; j++) {
 		            if(upper.getAt(i, j) != 0){
 		                var coeff = upper.getAt(i, j)/upper.getAt(i,i); // calculate pivot coefficient
 		                var rowJ = upper.getRow(j);
