@@ -16,7 +16,7 @@ public class Matrix {
          */
         var cols : int;
         var rows : int;
-        var data : Array;
+        var data : double [,];
 
 
         /* Constructor to create a new empty matrix of a given size */
@@ -31,11 +31,11 @@ public class Matrix {
                         return;
                 }
 
-                this.data = new Array(cols);
-
+                this.data = new double[cols, rows];
+/*
                 for (var i = 0; i < cols; i++) {
                         this.data[i] = new Array(rows);
-                }
+                }*/
         }
         
         /* Check if the matrix is a square matrix, i.e. its number of rows is equal
@@ -57,13 +57,13 @@ public class Matrix {
 
         /* Return the value at the given indices in the matrix. */
         public function getAt(col : int, row : int) : double {
-                var v : double = (this.data[col] as Array)[row];
+                var v : double = this.data[col, row];
                 return v;
         }
 
         /* Given two indices and a value, put the value into the matrix. */
-        public function setAt(col : int, row : int, value) : double {
-                (this.data[col] as Array)[row] = value;
+        public function setAt(col : int, row : int, value) {
+                this.data[col, row] = value;
         }
 
         /* Return a deep copy of the matrix. */
@@ -72,7 +72,7 @@ public class Matrix {
                 matrix = new Matrix(this.cols, this.rows);
                 for (var i = 0; i < this.cols; i++) {
                         for (var j = 0; j < this.rows; j++) {
-                                matrix.setAt(i, j, (this.data[i] as Array)[j]);
+                                matrix.setAt(i, j, this.data[i, j]);
                         }
                 }
 
@@ -84,7 +84,7 @@ public class Matrix {
                 var line = "";
                 for (var i = 0; i < this.rows; i++) {
                         for (var j = 0; j < this.cols; j++) {
-                                line += "[" + (this.data[j] as Array)[i] + "]";
+                                line += "[" + this.data[j,i] + "]";
                         }
                         Debug.Log(line);
                         line = "";
@@ -125,30 +125,36 @@ public class Matrix {
         }
         
         /* Return a complete row of the matrix as an Array */
-        public function getRow(i : int) : Array {
-                var a = new Array(this.cols);
+        public function getRow(i : int) : double[] {
+        		var a = new double[this.cols];
                 for (var j = 0; j < this.cols; j++) {
-                        a[j] = (this.data[j] as Array)[i];
+                        a[j] = this.data[j, i];
                 }
 
                 return a;
         }
 
         /* Set a complete row of the matrix to a given Array */
-        public function setRow(i : int, row : Array) : void {
+        public function setRow(i : int, row :double[]) : void {
                 for (var j = 0; j < this.cols; j++) {
-                        (this.data[j] as Array)[i] = row[j];
+                        this.data[j, i] = row[j];
                 }
         }
 
         /* Return a complete column of the matrix as an Array */
-        public function getCol(i : int) : Array {
-                return this.data[i];
+        public function getCol(i : int) : double[] {
+        		var colarray = new double[this.rows];
+        		for(var j = 0; j < this.rows; j++){
+        			colarray[j] = this.getAt(i, j);
+        		}
+                return colarray;
         }
 
         /* Set a complete column of the matrix to an Array */
-        public function setCol(i : int, col : Array) : void {
-                this.data[i] = col;
+        public function setCol(i : int, col : double[]) : void {
+                for(var j = 0; j < this.rows; j++){
+                	this.setAt(i, j, col[j]);
+                }
         }
 
         /* Add a given matrix to this matrix */
@@ -159,7 +165,7 @@ public class Matrix {
                 result = new Matrix(this.cols, this.rows);
                 for (var i = 0; i < this.cols; i++) {
                         for (var j = 0; j < this.rows; j++) {
-                                var v1 : double = (this.data[i] as Array)[j];
+                                var v1 : double = this.data[i,j];
                                 var v2 : double = matrix.getAt(i, j);
                                 var value : double =  v1 + v2;
                                 result.setAt(i, j, value);
@@ -178,7 +184,7 @@ public class Matrix {
                 result = new Matrix(this.cols, this.rows);
                 for (var i = 0; i < this.cols; i++) {
                         for (var j = 0; j < this.rows; j++) {
-                                var v1 : double = (this.data[i] as Array)[j];
+                                var v1 : double = this.data[i, j];
                                 var v2 : double = matrix.getAt(i, j);
                                 var value : double =  v1 - v2;
                                 result.setAt(i, j, value);
@@ -191,7 +197,7 @@ public class Matrix {
         /* Returns the dot product of two arrays. This is used in multiplying two
          * matrices together.
          */
-        private function dotProduct(a1 : Array, a2 : Array) : double {
+        private function dotProduct(a1 : double[], a2 : double[]) : double {
                 if (a1.length != a2.length) Debug.LogError("Cannot take dot product of vectors with unequal length. First length: " + a1.length + ", second length: " + a2.length + ".");
 
                 var result : double = 0;
@@ -243,73 +249,75 @@ public class Matrix {
 
         /* Calculate the determinant of this matrix. */
         public function determinant() : double {
-                
-                if (this.data == null) Debug.LogError("Cannot take the determinant of a matrix with no data");
-                if (!this.isSquare()) Debug.LogError("Cannot take the determinant of a matrix that is not square");
+		    if (this.data == null) {
+		        Debug.LogError("Cannot take the determinant of a matrix with no data");
+		    }
+		    if (!this.isSquare()) {
+		        Debug.LogError("Cannot take the determinant of a matrix that is not square");
+		    }
+		    
+		    var thismatrix = "";
+		    Debug.Log("DOING THE DETERMINANT OF");
+		    for(var matrixiter = 0; matrixiter < this.cols; matrixiter++){
+		    	for(var matrixiterrow = 0; matrixiterrow < this.rows; matrixiterrow++){
+		    		thismatrix += this.getAt(matrixiter, matrixiterrow);
+		    		thismatrix += " ";
+		    	}
+		    	thismatrix += "\n";
+		    }
+		    Debug.Log(thismatrix);
 
-                var copy: Matrix = this.copy();
-                var identity : Matrix = I(this.cols);
-            
-	        var numerator : double; 
-	        var denominator : double; 
-	        var element : double;
-	        var element2 : double;                
-	        var upper = new Array(copy.cols);
-	        var upper_i = new Array(copy.cols);
- 	        var lower = new Array(copy.cols);
-	        var lower_i = new Array(copy.cols);
-           
-                /* Reduce to upper row echelon form */
-                for(var i = 0; i < copy.rows - 1; i++) {
-	                upper = copy.getRow(i);
-                        var counter = i;
-                        
-                        while (upper[i] == 0) {
-                                upper = copy.getRow(++counter);
-                                if (counter >= copy.rows) {
-                                        Debug.LogError("Could not convert matrix to row echelon form to find determinant. Returning 0.");
-                                        return 0;
-                                }
-                        }
-	                
-                        upper_i = identity.getRow(counter);
-                    
-                        copy.setRow(counter, copy.getRow(i));
-                        copy.setRow(i, upper);
-                        identity.setRow(counter, identity.getRow(i));
-                        identity.setRow(i, upper_i);
-                    
-	                denominator = upper[i];
-	                
-                        for(var j = i + 1; j < copy.cols; j++) {
-                                lower = copy.getRow(j);
-                                lower_i = identity.getRow(j);                   
-                                numerator = lower[i];
+		    var upper : Matrix = this.copy();
+		    var swapCount : int = 0;
 
-                                for(var k = 0; k < copy.cols; k++) {
-                                        element = upper[k];
-                                        element2 = lower[k];
-                                        lower[k] = element2 - numerator/denominator * element;
-                                        element = upper_i[k];
-                                        element2 = lower_i[k];
-                                        lower_i[k] = element2 - numerator/denominator * element;
-                                }
-                                 
-                                copy.setRow(j, lower);
-                                identity.setRow(j, lower_i);
-                        
-                        }
-                }
-                
-                /* In this form the determinant is the sum of the main diagonal. */
-                var determinant : double = 1;
-                for(i = 0; i < copy.cols; i++) {
-                        determinant *= copy.getAt(i, i) * identity.getAt(i, i);
-                }
 
-                return determinant;
-                
-        }
+		    for(var i = 0; i < (this.cols -1); i++){
+		        if(upper.getAt(i, i) == 0){ //if this diagonal value is 0 we need to find a pivot
+		            var j = i;
+		            var switched = false;
+		            while(j < (this.cols -1) && !switched){
+		                if(upper.getAt(i,j) != 0){ // if this row has a pivot that is valid swap
+		                    upper.swapRows(i, j);
+		                    swapCount++;
+		                    switched = true;
+		                }
+		                j++;
+		            }
+		        } // now we have a valid pivot
+		        for (j = i+1; j < (this.cols-1); j++) {
+		            if(upper.getAt(i, j) != 0){
+		                var coeff = upper.getAt(i, j)/upper.getAt(i,i); // calculate pivot coefficient
+		                var rowJ = upper.getRow(j);
+		                var rowI = upper.getRow(i);
+		                for(var counter = 0; counter < rowJ.length; counter++){
+		                    rowI[counter] = rowI[counter] * coeff;
+		                    rowJ[counter] = rowJ[counter] - rowI[counter]; // set the new row to the zeroed value
+		                }
+		                if(rowJ[i] != 0){
+		                    Debug.LogError("ERROR Calculating Zeros returning 0"); // if something really bad happened and math broke 
+		                    return 0;
+		                }
+		                upper.setRow(j, rowJ);
+		            }
+		        }
+		    }
+
+		    var determinant : double = 1;
+		    for(i = 0; i < upper.cols; i++){
+		        determinant = determinant * upper.getAt(i,i);
+		    }
+		    
+		    for(i = 0; i < swapCount; i++){ //every swap multiplied the determinant by -1 so we need to account for that
+		        determinant = determinant * -1;
+		    }
+		    return determinant;
+		}
+
+		function swapRows(rowA, rowB){
+		    var copy : Matrix = this.copy();
+		    this.setRow(rowB, copy.getRow(rowA));
+		    this.setRow(rowA, copy.getRow(rowB));
+		}
         
         /* Find the inverse of this matrix, assuming it is invertible. */
         public function inverse() : Matrix {
@@ -323,10 +331,10 @@ public class Matrix {
 	        var denominator : double; 
 	        var element : double;
 	        var element2 : double;                
-	        var upper = new Array(copy.cols);
-	        var upper_i = new Array(copy.cols);
- 	        var lower = new Array(copy.cols);
-	        var lower_i = new Array(copy.cols);
+	        var upper = new double[copy.cols];
+	        var upper_i = new double[copy.cols];
+ 	        var lower = new double[copy.cols];
+	        var lower_i = new double[copy.cols];
            
                 // Reduce to the diagonal only. 
                 for(var i = 0; i < copy.rows; i++) {
@@ -377,10 +385,10 @@ public class Matrix {
                    	denominator = upper[i];
                     
                         for (j = 0; j < copy.cols; j++) {
-                                numerator = (copy.data[j] as Array)[i];
-                                (copy.data[j] as Array)[i] = numerator / denominator;
-                                numerator = (identity.data[j] as Array)[i];
-                                (identity.data[j] as Array)[i] = numerator / denominator;
+                                numerator = copy.data[j,i];
+                                copy.data[j,i] = numerator / denominator;
+                                numerator = identity.data[j,i];
+                                identity.data[j,i] = numerator / denominator;
                         }
                 }          
                                 
